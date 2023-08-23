@@ -1,98 +1,62 @@
 //your JS code here. If required.
-function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
+const images = [
+  "url-to-image-1",
+  "url-to-image-2",
+  "url-to-image-3",
+  "url-to-image-4",
+  "url-to-image-5"
+];
 
-    // Helper function to check if two images have the same class
-    function isIdentical(img1, img2) {
-      return img1.className === img2.className;
-    }
+// Choose a random image to repeat
+const repeatImage = images[Math.floor(Math.random() * images.length)];
 
-    // Get the image elements
-    const imageContainer = document.getElementById("image-container");
-    const images = imageContainer.getElementsByTagName("img");
-  
-    // Create an array of class names for the images
-    const classNames = ["img1", "img2", "img3", "img4", "img5"];
-  
-    // Shuffle the class names and assign them to the images
-    const shuffledClassNames = shuffleArray([...classNames, ...classNames]);
-    for (let i = 0; i < images.length; i++) {
-      images[i].className = shuffledClassNames[i];
+// Add a duplicate image to the array
+images.push(repeatImage);
+
+// Shuffle the array
+for (let i = images.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [images[i], images[j]] = [images[j], images[i]];
+}
+
+// Assign class names to each image tag
+const imgTags = document.querySelectorAll("img");
+for (let i = 0; i < imgTags.length; i++) {
+  imgTags[i].classList.add("img" + (i+1));
+  imgTags[i].src = images[i];
+}
+
+let selectedImages = [];
+
+// Add click event listeners to images
+imgTags.forEach(img => {
+  img.addEventListener("click", () => {
+    if (selectedImages.length < 2) {
+      img.classList.add("selected");
+      selectedImages.push(img);
     }
-  
-    // Store the selected images
-    let selectedImages = [];
-  
-    // Store the current state
-    let state = 1;
-  
-    // Function to handle image click
-    function handleImageClick(event) {
-      const clickedImage = event.target;
-  
-      // Ignore clicks on already selected images
-      if (selectedImages.includes(clickedImage)) {
-        return;
-      }
-  
-      // Reset the previous selection if more than two images are selected
-      if (selectedImages.length >= 2) {
-        selectedImages.forEach((image) => image.classList.remove("selected"));
-        selectedImages = [];
-      }
-  
-      // Add the clicked image to the selection
-      clickedImage.classList.add("selected");
-      selectedImages.push(clickedImage);
-  
-      // Change state based on the number of selected images
-      if (selectedImages.length === 1) {
-        state = 2;
-        document.getElementById("reset").style.display = "block";
-      } else if (selectedImages.length === 2) {
-        state = 3;
-        document.getElementById("verify").style.display = "block";
-      }
+    if (selectedImages.length === 2) {
+      const verifyButton = document.getElementById("verify");
+      verifyButton.classList.remove("hidden");
+      verifyButton.addEventListener("click", () => {
+        if (selectedImages[0].classList[0] === selectedImages[1].classList[0]) {
+          document.getElementById("para").textContent = "You are a human. Congratulations!";
+        } else {
+          document.getElementById("para").textContent = "We can't verify you as a human. You selected the non-identical tiles.";
+        }
+        verifyButton.classList.add("hidden");
+      });
     }
-  
-    // Function to handle reset button click
-    function handleResetClick() {
-      selectedImages.forEach((image) => image.classList.remove("selected"));
+    const resetButton = document.getElementById("reset");
+    resetButton.classList.remove("hidden");
+    resetButton.addEventListener("click", () => {
+      selectedImages.forEach(img => {
+        img.classList.remove("selected");
+      });
       selectedImages = [];
-  
-      state = 1;
-      document.getElementById("reset").style.display = "none";
-      document.getElementById("verify").style.display = "none";
-      document.getElementById("para").innerHTML = "";
-    }
-  
-    // Function to handle verify button click
-    function handleVerifyClick() {
-      const img1 = selectedImages[0];
-      const img2 = selectedImages[1];
-  
-      if (isIdentical(img1, img2)) {
-        document.getElementById("para").innerHTML = "You are a human. Congratulations!";
-      } else {
-        document.getElementById("para").innerHTML = "We can't verify you as a human. You selected the non-identical tiles.";
-      }
-  
-      state = 4;
-      document.getElementById("verify").style.display = "none";
-    }
-  
-    // Attach click event listeners to the images
-    for (let i = 0; i < images.length; i++) {
-      images[i].addEventListener("click", handleImageClick);
-    }
-  
-    // Attach click event listener to the reset button
-    document.getElementById("reset").addEventListener("click", handleResetClick);
-  
-    // Attach click event listener to the verify button
-    document.getElementById("verify").addEventListener("click", handleVerifyClick);
+      document.getElementById("verify").classList.add("hidden");
+      resetButton.classList.add("hidden");
+      document.getElementById("para").textContent = "";
+    });
+  });
+});
